@@ -284,15 +284,30 @@ class User extends Authenticatable
         return $this->morphMany(UserLog::class,'targetable');
     }
 
-    public function getLogs(){
-    }
-
     /**
      * @return string
      */
     public function getImageUrl(): string
     {
         return $this->image_url;
+    }
+
+    /**
+     * @return string|null
+     * Получаем публичный путь изображения
+     * Передаем в переменную $imageUrl строку, содержащую путь до файла на сайте
+     *
+     */
+    public function getImageUrlLocalPath():?string {
+        $imageUrl = $this->getImageUrl();
+        /**
+         * Если путь существует, то заменяем http://realno.ebsp.ru/storage/ на ' '
+         * Получаем из публичного пути локальный
+         */
+        if (null !== $imageUrl){
+            $imageUrl = str_replace('http://realno.ebsp.ru/storage/','',$imageUrl);
+        }
+        return $imageUrl;
     }
 
     /**

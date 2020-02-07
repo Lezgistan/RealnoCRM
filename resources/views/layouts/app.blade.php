@@ -35,7 +35,14 @@
 
     </main>
 </div>
-<script src="{{ mix('js/app.js') }}" async></script>
+<script src="{{ mix('js/app.js') }}" ></script>
 
+<script>
+    $('[type=file]').on('change',function () {
+    $(this).parent().find('.custom-file-label').html(this.files[0].name);
+    })
+</script>
+
+@stack('scripts')
 </body>
 </html>
