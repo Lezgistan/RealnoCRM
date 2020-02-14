@@ -297,6 +297,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany
+     */
+    public function docs(): HasMany
+    {
+        return $this->hasMany(UserDoc::class);
+    }
+
+    /**
      * @return string
      */
     public function getImageUrl(): string
