@@ -2,7 +2,7 @@
 
 namespace App\Models\Users;
 
-
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -64,6 +64,8 @@ use Illuminate\Notifications\Notifiable;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\UserLog[] $logsForMe
  * @property-read int|null $logs_for_me_count
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\User whereImageUrl($value)
+ * @property \Illuminate\Support\Carbon|null $last_active
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\User whereLastActive($value)
  */
 class User extends Authenticatable
 
@@ -85,6 +87,7 @@ class User extends Authenticatable
         'password',
         'age',
         'image_url',
+        'last_active',
     ];
 
     protected $hidden = [
@@ -92,12 +95,17 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $dates =[
+        'age',
+        'last_active',
+    ];
+
     /**
      * @return string
      */
     public function getName(): string
     {
-        return trim( $this->getFirstName() . ' ' . $this->getMiddleName());
+        return trim($this->getFirstName() . ' ' . $this->getMiddleName());
     }
 
     /**
@@ -229,6 +237,7 @@ class User extends Authenticatable
      */
     public function getAge(): int
     {
+
         return $this->age;
     }
 
@@ -258,7 +267,7 @@ class User extends Authenticatable
                             return $query->orWhere('f_name', 'like', '%' . $value . '%')
                                 ->orWhere('l_name', 'like', '%' . $value . '%')
                                 ->orWhere('m_name', 'like', '%' . $value . '%')
-                                ->orWhere('email','like','%'.$value.'%');
+                                ->orWhere('email', 'like', '%' . $value . '%');
                         });
                     }
                     break;
@@ -269,19 +278,22 @@ class User extends Authenticatable
     /**
      * @return string
      */
-    public function getUrl():string {
-        return route('users.show',$this);
+    public function getUrl(): string
+    {
+        return route('users.show', $this);
     }
 
     /**
      * @return HasMany
      */
-    public function logs():HasMany{
+    public function logs(): HasMany
+    {
         return $this->hasMany(UserLog::class);
     }
 
-    public function logsForMe(){
-        return $this->morphMany(UserLog::class,'targetable');
+    public function logsForMe()
+    {
+        return $this->morphMany(UserLog::class, 'targetable');
     }
 
     /**
@@ -298,14 +310,15 @@ class User extends Authenticatable
      * Передаем в переменную $imageUrl строку, содержащую путь до файла на сайте
      *
      */
-    public function getImageUrlLocalPath():?string {
+    public function getImageUrlLocalPath(): ?string
+    {
         $imageUrl = $this->getImageUrl();
         /**
          * Если путь существует, то заменяем http://realno.ebsp.ru/storage/ на ' '
          * Получаем из публичного пути локальный
          */
-        if (null !== $imageUrl){
-            $imageUrl = str_replace('http://realno.ebsp.ru/storage/','',$imageUrl);
+        if (null !== $imageUrl) {
+            $imageUrl = str_replace('http://realno.ebsp.ru/storage/', '', $imageUrl);
         }
         return $imageUrl;
     }
@@ -318,4 +331,26 @@ class User extends Authenticatable
         $this->image_url = $image_url;
     }
 
+    /**
+     * @return \Illuminate\Support\Carbon|null
+     */
+    public function getLastActive(): ?\Illuminate\Support\Carbon
+    {
+        return $this->last_active;
+    }
+
+    /**
+     * @param \Illuminate\Support\Carbon|null $last_active
+     */
+    public function setLastActive(?\Illuminate\Support\Carbon $last_active): void
+    {
+        $this->last_active = $last_active;
+    }
+
+
+
+    public function isOnline()
+    {
+        return ($this->last_active > new \DateTime('-5 minutes') && \Auth::check()) ? true : false;
+    }
 }

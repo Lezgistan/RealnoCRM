@@ -36,13 +36,34 @@
     </main>
 </div>
 <script src="{{ mix('js/app.js') }}" ></script>
-
 <script>
     $('[type=file]').on('change',function () {
     $(this).parent().find('.custom-file-label').html(this.files[0].name);
     })
 </script>
-
+<script>
+    window.addEventListener('load', function() {
+        document.querySelector('input[type="file"]').addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                var img = document.getElementById('avatar');  // $('img')[0]
+                img.src = URL.createObjectURL(this.files[0]); // set src to blob url
+                img.onload = imageIsLoaded;
+            }
+        });
+    });
+</script>
+<script>
+    function thisFileUpload() {
+        document.getElementById("file").click();
+    };
+</script>
+<script>
+    let xhr = new XMLHttpRequest();
+    setInterval(function() {
+        xhr.open('GET', '/');
+        xhr.send();
+    },30000);
+</script>
 @stack('scripts')
 </body>
 </html>

@@ -38,8 +38,10 @@ use App\Models\Users\User;
                 <div class="col-1">
                     {{ $user->getKey() }}
                 </div>
-
-                <div class="col-lg-7 col-6">
+                <div class="col-1">
+                    <img class="img-fluid rounded-circle w-75" src="{{$user->getImageUrl()}}" alt="">
+                </div>
+                <div class="col-6">
                     {{ $user->getLastName() }}
                     {{ $user->getFirstName() }}
                     {{ $user->getMiddleName() }},
@@ -52,7 +54,7 @@ use App\Models\Users\User;
 
                 </div>
 
-                <div class="col-lg-4 text-right">
+                <div class="col-4 text-right">
 
                     @if ((0 < $user->logs()->count())|(0 < $user->logsForMe()->count()))
                         <div class="btn-group table-links">

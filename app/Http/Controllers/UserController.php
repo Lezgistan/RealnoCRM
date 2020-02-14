@@ -89,11 +89,12 @@ class UserController extends Controller
             'l_name' => 'required|min:1|max:50',
             'm_name' => 'required|min:1|max:50',
             'email' => 'required|unique:users',
-            'image' => 'mimes:jpeg,jpg,png|dimensions:min_width=1000,min_height=400',
+            'image' => 'mimes:jpeg,jpg,png|dimensions:max_height=500,max_width=500,ratio=1/1',
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'age' => ['required', 'before:' . $dateTo],
         ], [
-            'age.before' => 'Вам должно быть больше 18'
+            'age.before' => 'Вам должно быть больше 18',
+            'image.dimensions'=>'Слишком маленькая картинка'
         ]);
 
         $user = User::create($data);
@@ -167,12 +168,13 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @param User $user
+     * @return Factory|View
      */
-    public function show($id)
+    public function show(User $user)
     {
-        //
+        $roles= $this->roles->all();
+        return view('users.show', compact('user','roles'));
     }
 
     /**
@@ -203,7 +205,7 @@ class UserController extends Controller
             'f_name' => 'required',
             'l_name' => 'required',
             'm_name' => 'required',
-            'image' => 'mimes:jpeg,jpg,png|dimensions:min_width=1000,min_height=400',
+            'image' => 'mimes:jpeg,jpg,png|dimensions:max_height=500,max_width=500,ratio=1/1',
         ]);
 
         /**
@@ -215,35 +217,40 @@ class UserController extends Controller
         $user->setEmail($frd['email']);
         $user->save();
         $storage = Storage::disk('public');
-        $localPath = '/users/avatars/'.$user->getKey().'-'.time().'.jpg';
-        /**
-         * При изменении профиля нужно удалять старое изображение и добавлять новое
-         * Получаем локальный путь старого изображения и записываем его в переменную $oldAvatarLocalPath
-         */
-        $oldAvatarLocalPath = $user->getImageUrlLocalPath();
-        /**
-         * Если старое изображение не равно нулю(существует) и в публичном хранилище есть этот файл, то удалаем его из хранилища
-         * Чтобы в дальнейшем загрузить новое
-         */
-       if (null !== $oldAvatarLocalPath && $storage->has($oldAvatarLocalPath)) {
-           $storage->delete($oldAvatarLocalPath);
-       }
-        /**
-         * Запрашиваем файл изображения, берем это изображение
-         * И шакалим его до 500px в высоту и относительную ширину
-         *
-         */
-        $image = $request->file('image');
-        \Image::make($image)->resize(null,5,function ($constraint){
-           $constraint->aspectRatio();
-        });
-        /**
-         * @var FilesystemAdapter $storage
-         * По аналогии вкидываем уже сшакаленный файл
-         */
-        $storage->put($localPath, $image->get());
-        $publicPath = $storage->url($localPath);
-        $user->setImageUrl($publicPath);
+
+        if ($request->hasFile('image')){
+            $localPath = '/users/avatars/'.$user->getKey().'-'.time().'.jpg';
+            /**
+             * При изменении профиля нужно удалять старое изображение и добавлять новое
+             * Получаем локальный путь старого изображения и записываем его в переменную $oldAvatarLocalPath
+             */
+            $oldAvatarLocalPath = $user->getImageUrlLocalPath();
+            /**
+             * Если старое изображение не равно нулю(существует) и в публичном хранилище есть этот файл, то удалаем его из хранилища
+             * Чтобы в дальнейшем загрузить новое
+             */
+            if (null !== $oldAvatarLocalPath && $storage->has($oldAvatarLocalPath)) {
+                $storage->delete($oldAvatarLocalPath);
+            }
+            /**
+             * Запрашиваем файл изображения, берем это изображение
+             * И шакалим его до 500px в высоту и относительную ширину
+             *
+             */
+            $image = $request->file('image');
+            \Image::make($image)->resize(null,128,function ($constraint){
+                $constraint->aspectRatio();
+            });
+            /**
+             * @var FilesystemAdapter $storage
+             * По аналогии вкидываем уже сшакаленный файл
+             */
+            $storage->put($localPath, $image->get());
+            $publicPath = $storage->url($localPath);
+            $user->setImageUrl($publicPath);
+        }
+
+
         $user->save();
 
         $flashMessages = [['type' => 'success', 'text' => 'Пользователь «' . $user->getName() . '» сохранен']];
