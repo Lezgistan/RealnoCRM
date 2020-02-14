@@ -9,7 +9,10 @@ use App\Models\Users\Role;
 use App\Models\Users\UserLog;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -82,32 +85,80 @@ class UserController extends Controller
         $data = $request->all();
         $dateTo = Carbon::now()->subYears(18);
         $this->validate($request, [
-
             'f_name' => 'required|min:1|max:50',
             'l_name' => 'required|min:1|max:50',
             'm_name' => 'required|min:1|max:50',
             'email' => 'required|unique:users',
-            'image' => 'required|mimes:jpeg,jpg,png|dimensions:min_width=1000,min_height=400',
+            'image' => 'mimes:jpeg,jpg,png|dimensions:max_height=500,max_width=500,ratio=1/1',
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'age' => ['required', 'before:' . $dateTo],
         ], [
-            'age.before' => 'Вам должно быть больше 18'
+            'age.before' => 'Вам должно быть больше 18',
+            'image.dimensions'=>'Слишком маленькая картинка'
         ]);
-        $image = $request->file('image');
-        $storage = Storage::disk('public');
-        $storage->put('/images/1.jpg', $image->get());
-        $user = User::create($data);
 
+        $user = User::create($data);
         $user->setName($data['f_name'], 1);
         $user->setName($data['m_name'], 2);
         $user->setName($data['l_name'], 0);
-        $user->setImageUrl($image);
         $user->setPassword($data['password']);
         $user->save();
+
+        /**
+         * @var UploadedFile $image
+         *
+         * Запрашиваем файл по ключу image из формы
+         */
+        $image = $request->file('image');
+        /**
+         * @var FilesystemAdapter $storage
+         * Создаем публичное хранилище
+         *
+         *
+         */
+        $storage = Storage::disk('public');
+
+        /**
+         *
+         * Если картинка отправлена в форме
+         * Получаем из нее исходный код
+         *
+         */
+        if(isset($image)){
+            $imageSource = $image->get();
+
+            /**
+             * @var $localPath string
+             *
+             * Локальный путь для аватарок
+             *
+             * time - функцтя php, выводит кол-во секунд от 1970 года
+             *
+             */
+            $localPath = '/users/avatars/'.$user->getKey().'-'.time().'.jpg';
+            /**
+             * Кладем нашу картинку в локальный путь для аватарок
+             *
+             */
+            $storage->put($localPath, $imageSource);
+            /**
+             * Создаем публичный путь
+             * На этот путь будем ссылаться при отображении картинки на сайте
+             * Тоесть не из корня папки(localpath), а прямо ссылкой(<img src="сайт/картинка">)
+             * SetImageUrl - записываем нашу картинку в базу данных и сохраняем
+             *
+             */
+            $publicPath = $storage->url($localPath);
+            $user->setImageUrl($publicPath);
+            $user->save();
+
+        };
 
         if (isset($data['roles'])) {
             $user->roles()->sync($data['roles']);
         }
+
+
         $flashMessages = [['type' => 'success', 'text' => 'Пользователь «' . $user->getName() . '» создан']];
         event(new Registered($user));
         return redirect()->route('users.index')->with(compact('flashMessages'));
@@ -117,12 +168,13 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @param User $user
+     * @return Factory|View
      */
-    public function show($id)
+    public function show(User $user)
     {
-        //
+        $roles= $this->roles->all();
+        return view('users.show', compact('user','roles'));
     }
 
     /**
@@ -153,9 +205,9 @@ class UserController extends Controller
             'f_name' => 'required',
             'l_name' => 'required',
             'm_name' => 'required',
-            'image' => 'required|mimes:jpeg,jpg,png|dimensions:min_width=1000,min_height=400',
+            'image' => 'mimes:jpeg,jpg,png|dimensions:max_height=500,max_width=500,ratio=1/1',
         ]);
-        $image = $request->file('image')->storePublicly('resources/images/users/avatars');
+
         /**
          * @var User $user
          */
@@ -163,7 +215,42 @@ class UserController extends Controller
         $user->setLastName($frd['l_name']);
         $user->setMiddleName($frd['m_name']);
         $user->setEmail($frd['email']);
-        $user->setImageUrl($image);
+        $user->save();
+        $storage = Storage::disk('public');
+
+        if ($request->hasFile('image')){
+            $localPath = '/users/avatars/'.$user->getKey().'-'.time().'.jpg';
+            /**
+             * При изменении профиля нужно удалять старое изображение и добавлять новое
+             * Получаем локальный путь старого изображения и записываем его в переменную $oldAvatarLocalPath
+             */
+            $oldAvatarLocalPath = $user->getImageUrlLocalPath();
+            /**
+             * Если старое изображение не равно нулю(существует) и в публичном хранилище есть этот файл, то удалаем его из хранилища
+             * Чтобы в дальнейшем загрузить новое
+             */
+            if (null !== $oldAvatarLocalPath && $storage->has($oldAvatarLocalPath)) {
+                $storage->delete($oldAvatarLocalPath);
+            }
+            /**
+             * Запрашиваем файл изображения, берем это изображение
+             * И шакалим его до 500px в высоту и относительную ширину
+             *
+             */
+            $image = $request->file('image');
+            \Image::make($image)->resize(null,128,function ($constraint){
+                $constraint->aspectRatio();
+            });
+            /**
+             * @var FilesystemAdapter $storage
+             * По аналогии вкидываем уже сшакаленный файл
+             */
+            $storage->put($localPath, $image->get());
+            $publicPath = $storage->url($localPath);
+            $user->setImageUrl($publicPath);
+        }
+
+
         $user->save();
 
         $flashMessages = [['type' => 'success', 'text' => 'Пользователь «' . $user->getName() . '» сохранен']];
@@ -180,8 +267,13 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $flashMessages = [['type' => 'success', 'text' => 'Пользователь «' . $user->getName() . '» удален']];
+        $storage = Storage::disk('public');
+        $oldAvatarLocalPath = $user->getImageUrlLocalPath();
+        if (null !== $oldAvatarLocalPath && $storage->has($oldAvatarLocalPath)) {
+            $storage->delete($oldAvatarLocalPath);
+        }
         $user->delete();
+        $flashMessages = [['type' => 'success', 'text' => 'Пользователь «' . $user->getName() . '» удален']];
         return redirect()->back()->with(compact('flashMessages'));
     }
 
@@ -204,7 +296,6 @@ class UserController extends Controller
     public function rolesUpdate(Request $request, User $user)
     {
         $frd = $request->only('roles');
-
         $user->roles()->sync($frd['roles']);
 
         $flashMessages = [['type' => 'success', 'text' => 'Роли пользователя «' . $user->getName() . '» обновлены']];

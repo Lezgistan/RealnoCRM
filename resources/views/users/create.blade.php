@@ -45,11 +45,11 @@
              'required'=>true,
           'label'=>'Повторение пароля'
       ])
-            @include('form._input',[
+            <label for="">Аватар</label>
+            @include('form._file',[
           'name'=>'image',
            'type'=>'file',
-             'required'=>true,
-          'label'=>'Изображение'
+           'label'=>'Загрузите файл',
       ])
             <div class="col-1"></div>
             <div class="col-lg-4">

@@ -7,3 +7,45 @@
 @import '~@fortawesome/fontawesome-free/scss/solid';
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
+
+.table-links{
+    visibility:hidden;
+}
+.table-item{
+
+}
+.table-item:hover .table-links{
+    visibility:visible;
+}
+.nav-avatar{
+    width: 2.5em;
+    height: 2.5em;
+}
+.bg-avatar{
+    width: 6em;
+    height: 6em;
+}
+.avatar-upload{
+    visibility: hidden;
+}
+.image-hover-wrapper:hover .avatar-upload{
+visibility:visible;
+}
+.upload-button button:focus {
+    outline:none;
+    box-shadow: none;
+}
+.image-hover-wrapper:hover {
+    filter: brightness(60%);
+}
+.fa-upload{
+    color: white;
+}
+.name-show{
+    vertical-align: middle;
+}
+.user-status{
+    width: 10px;
+    height: 10px;
+    background: forestgreen;
+}

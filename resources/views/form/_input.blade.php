@@ -26,12 +26,9 @@ if (isset($name)) {
     'required'=>$required ?? null,
     'placeholder'=>$placeholder ?? null,
     ]) }}
-
-
     @if (isset($text))
         <small class="form-text text-muted">{!! $text !!}</small>
     @endif
-
 
     @if($errors->has($name) === true)
         <div class="invalid-feedback">{{ $errors->first($name) }}</div>

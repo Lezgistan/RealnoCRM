@@ -32,6 +32,8 @@ use Laratrust\Traits\LaratrustTeamTrait;
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
  * @property-read int|null $notifications_count
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\Role filter($frd)
+ * @property string $color
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\Role whereColor($value)
  */
 class Role extends LaratrustRole
 {
@@ -45,6 +47,7 @@ class Role extends LaratrustRole
         'name',
         'display_name',
         'description',
+        'color',
     ];
     /**
      * @return int
@@ -85,7 +88,6 @@ class Role extends LaratrustRole
     {
         return $this->display_name;
     }
-
     /**
      * @param string|null $display_name
      */
@@ -136,5 +138,20 @@ class Role extends LaratrustRole
         }
         return $query;
     }
+    /**
+     * @return string
+     */
+    public function getColor(): string
+    {
+        return $this->color ?? 'secondary';
+    }
+    /**
+     * @param string $color
+     */
+    public function setColor(string $color): void
+    {
+        $this->color = $color;
+    }
+
 
 }
