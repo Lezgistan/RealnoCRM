@@ -24,6 +24,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('users','UserController');
     Route::resource('roles','RoleController');
     Route::resource('permissions','PermissionController');
+    Route::resource('documents','DocumentController');
     Route::get('users/{user}/roles', 'UserController@roles')->name('users.roles');
     Route::get('users/{user}', 'UserController@show')->name('users.show');
     Route::patch('users/{user}/roles', 'UserController@rolesUpdate')->name('users.roles.update');
