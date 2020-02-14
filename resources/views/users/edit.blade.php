@@ -15,7 +15,7 @@
                     <img class="img-fluid rounded-circle bg-avatar card-img" id="avatar" src="{{$user->getImageUrl()}}"
                          alt="Аватарка">
                     <div class="avatar-upload card-img-overlay">
-                    @include('form._file',[
+                    @include('form._avatar',[
                     'name'=>'image',
                     'label'=>'Загрузите файл',
                  ])
