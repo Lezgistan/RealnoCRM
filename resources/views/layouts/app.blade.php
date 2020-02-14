@@ -57,6 +57,13 @@
         document.getElementById("file").click();
     };
 </script>
+<script>
+    let xhr = new XMLHttpRequest();
+    setInterval(function() {
+        xhr.open('GET', '/');
+        xhr.send();
+    },30000);
+</script>
 @stack('scripts')
 </body>
 </html>
