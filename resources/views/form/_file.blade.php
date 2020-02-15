@@ -25,7 +25,7 @@ if (isset($name)) {
     {{ Form::input( $type,$name,$value ?? null,[
     'class'=>'custom-file-input'.($errors->has($name) ? ' is-invalid ' : null),
     'id'=>'customFile',
-    'required'=>$required,
+    'required'=>$required ?? false,
     'placeholder'=>$placeholder ?? null,
     ]) }}
     @if (isset($text))

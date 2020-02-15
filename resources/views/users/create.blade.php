@@ -46,7 +46,7 @@
           'label'=>'Повторение пароля'
       ])
             <label for="">Аватар</label>
-            @include('form._avatar',[
+            @include('form._file',[
           'name'=>'image',
            'type'=>'file',
            'label'=>'Загрузите файл',

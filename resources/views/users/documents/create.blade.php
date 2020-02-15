@@ -10,7 +10,7 @@
                 'label'=>'Название документа'
             ])
             @include('form._file',[
-          'name'=>'image',
+          'name'=>'document',
            'type'=>'file',
            'required'=>true,
            'label'=>'Выбрать файл',
