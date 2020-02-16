@@ -24,6 +24,10 @@
                         'name' => '<i class="fas fa-fw fa-user-check"></i> Разрешения</a>',
                         'route' => 'permissions.index',
                     ],
+                    [
+                        'name' => '<i class="fas fa-file-alt"></i> Документы</a>',
+                        'route' => 'documents.index',
+                    ],
                 ]
                 ?>
                 @forelse($navItems as $navItem)
