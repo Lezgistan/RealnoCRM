@@ -6,6 +6,7 @@ use App\Events\Auth\ChangePassword;
 use App\Events\Auth\UserUpdate;
 use App\Models\Users\User;
 use App\Models\Users\Role;
+use App\Models\Users\UserDoc;
 use App\Models\Users\UserLog;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\View\Factory;
@@ -36,7 +37,10 @@ class UserController extends Controller
      * @var $userLogs
      */
     protected $userLogs;
-
+    /**
+     * @var UserDoc
+     */
+    protected $userDocs;
 
     /**
      * UserController constructor.
@@ -44,11 +48,12 @@ class UserController extends Controller
      * @param Role $roles
      * @param UserLog $userLogs
      */
-    public function __construct(User $users, Role $roles, UserLog $userLogs)
+    public function __construct(User $users, Role $roles, UserLog $userLogs, UserDoc $userDocs)
     {
         $this->users = $users;
         $this->roles = $roles;
         $this->userLogs = $userLogs;
+        $this->userDocs = $userDocs;
     }
 
     /**
@@ -94,7 +99,7 @@ class UserController extends Controller
             'age' => ['required', 'before:' . $dateTo],
         ], [
             'age.before' => 'Вам должно быть больше 18',
-            'image.dimensions'=>'Слишком маленькая картинка'
+            'image.dimensions' => 'Слишком маленькая картинка'
         ]);
 
         $user = User::create($data);
@@ -124,7 +129,7 @@ class UserController extends Controller
          * Получаем из нее исходный код
          *
          */
-        if(isset($image)){
+        if (isset($image)) {
             $imageSource = $image->get();
 
             /**
@@ -135,7 +140,7 @@ class UserController extends Controller
              * time - функцтя php, выводит кол-во секунд от 1970 года
              *
              */
-            $localPath = '/users/avatars/'.$user->getKey().'-'.time().'.jpg';
+            $localPath = '/users/avatars/' . $user->getKey() . '-' . time() . '.jpg';
             /**
              * Кладем нашу картинку в локальный путь для аватарок
              *
@@ -173,8 +178,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $roles= $this->roles->all();
-        return view('users.show', compact('user','roles'));
+        $roles = $this->roles->all();
+        return view('users.show', compact('user', 'roles'));
     }
 
     /**
@@ -218,8 +223,8 @@ class UserController extends Controller
         $user->save();
         $storage = Storage::disk('public');
 
-        if ($request->hasFile('image')){
-            $localPath = '/users/avatars/'.$user->getKey().'-'.time().'.jpg';
+        if ($request->hasFile('image')) {
+            $localPath = '/users/avatars/' . $user->getKey() . '-' . time() . '.jpg';
             /**
              * При изменении профиля нужно удалять старое изображение и добавлять новое
              * Получаем локальный путь старого изображения и записываем его в переменную $oldAvatarLocalPath
@@ -238,7 +243,7 @@ class UserController extends Controller
              *
              */
             $image = $request->file('image');
-            \Image::make($image)->resize(null,128,function ($constraint){
+            \Image::make($image)->resize(null, 128, function ($constraint) {
                 $constraint->aspectRatio();
             });
             /**
@@ -301,6 +306,19 @@ class UserController extends Controller
         $flashMessages = [['type' => 'success', 'text' => 'Роли пользователя «' . $user->getName() . '» обновлены']];
 
         return redirect()->back()->with(compact('flashMessages'));
+    }
+
+    /**
+     * @param Request $request
+     * @param UserDoc $documents
+     * @param User $user
+     * @return Factory|View
+     */
+    public function documents(Request $request, UserDoc $documents, User $user)
+    {
+        $frd = $request->all();
+        $documents = $this->userDocs->filterDocument($user->getKey())->filter($frd)->paginate($frd['perPage'] ?? 20);
+        return view('users.documents', compact('documents'));
     }
 
     /**
