@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Users\Role;
+
 use App\Models\Users\User;
 use App\Models\Users\UserLog;
 use Illuminate\Http\Request;
@@ -14,19 +14,20 @@ class DocumentController extends Controller
     /**
      * @var UserDoc
      */
-    protected $docs;
+    protected $documents;
 
-    public function __construct(UserDoc $docs)
+
+    public function __construct(UserDoc $documents)
     {
-        $this->docs = $docs;
+        $this->documents = $documents;
     }
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return View
      */
-    public function index()
+    public function index(Request $request)
     {
 
     }
@@ -42,10 +43,9 @@ class DocumentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request)
     {
