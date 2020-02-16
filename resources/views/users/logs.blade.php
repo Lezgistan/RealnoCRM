@@ -58,5 +58,7 @@ use App\Models\Users\User;
             Логи отсутствуют
         </div>
     @endforelse
-
+    @include('form._pagination',[
+            'elements'=>$logs,
+        ])
 @stop
