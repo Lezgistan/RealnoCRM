@@ -66,6 +66,8 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\User whereImageUrl($value)
  * @property \Illuminate\Support\Carbon|null $last_active
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\User whereLastActive($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\UserDoc[] $docs
+ * @property-read int|null $docs_count
  */
 class User extends Authenticatable
 
