@@ -29,7 +29,10 @@ class DocumentController extends Controller
      */
     public function index(Request $request)
     {
+        $frd = $request->all();
+        $documents = $this->documents::filter($frd)->paginate(20);
 
+        return view('users.documents.index', compact('documents', 'frd'));
     }
 
     /**
@@ -49,7 +52,15 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
-
+        $data = $request->all();
+        $this->validate($request, [
+            'name' => 'required|min:1|max:50',
+            'document' => 'required',
+        ]);
+        $documents = UserDoc::create($data);
+        $documents->setUserId(\Auth::id());
+        $documents->save();
+        return redirect()->route('documents.index');
     }
 
     /**
