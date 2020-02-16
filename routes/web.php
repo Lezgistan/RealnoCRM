@@ -31,6 +31,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('users/{user}/password', 'UserController@password')->name('users.password');
     Route::patch('users/{user}/password', 'UserController@passwordUpdate')->name('users.password.update');
     Route::get('users/{user}/logs','UserController@logs')->name('users.logs');
+    Route::get('users/{user}/documents','UserController@documents')->name('users.docs');
 });
 
 
