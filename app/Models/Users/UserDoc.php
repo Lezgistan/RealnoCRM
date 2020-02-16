@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models\Users;
-
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,9 +27,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc whereUserId($value)
+ * @property-read \App\Models\Users\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc filter($frd)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc filterDocument($userId)
  */
 class UserDoc extends Model
 {
+
+
     protected $table = 'user_docs';
 
     protected $primaryKey = 'id';
@@ -105,12 +110,40 @@ class UserDoc extends Model
         $this->user_id = $user_id;
     }
 
+  
     /**
      * @return BelongsTo
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+    public function scopeFilterDocument(Builder $query, int $userId): Builder
+    {
+        return $query->where(function (Builder $query) use ($userId): Builder {
+            return $query->orWhere('user_id', $userId);
+        });
+    }
+    public function scopeFilter(Builder $query, array $frd): Builder
+    {
+        array_filter($frd);
+        foreach ($frd as $key => $value) {
+            if (null === $value) {
+                continue;
+            }
+            switch ($key) {
+                case 'search':
+                    {
+                        $query->where(function (Builder $query) use ($value): Builder {
+                            return $query->orWhere('user_id', 'like', '%' . $value . '%')
+                                ->orWhere('name', 'like', '%' . $value . '%')
+                                ->orWhere('id', 'like', '%' . $value . '%');
+                        });
+                    }
+                    break;
+            }
+        }
+        return $query;
     }
 
 }
