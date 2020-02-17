@@ -5,6 +5,7 @@ use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\Users\UserDoc
@@ -30,6 +31,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\Users\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc filter($frd)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc filterDocument($userId)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $version
+ * @property-read int|null $version_count
  */
 class UserDoc extends Model
 {
@@ -124,6 +127,14 @@ class UserDoc extends Model
     public function setId(int $id): void
     {
         $this->id = $id;
+    }
+
+    /**
+     * @return hasMany
+     */
+    public function version():hasMany
+    {
+        return $this->hasMany(DocumentVersion::class);
     }
 
     /**

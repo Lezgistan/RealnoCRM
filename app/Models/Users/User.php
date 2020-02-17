@@ -68,6 +68,8 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\User whereLastActive($value)
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\UserDoc[] $docs
  * @property-read int|null $docs_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $documentversion
+ * @property-read int|null $documentversion_count
  */
 class User extends Authenticatable
 
@@ -97,7 +99,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected $dates =[
+    protected $dates = [
         'age',
         'last_active',
     ];
@@ -250,6 +252,7 @@ class User extends Authenticatable
     {
         $this->age = $age;
     }
+
     /**
      * @param Builder $query
      * @param array $frd
@@ -277,12 +280,21 @@ class User extends Authenticatable
         }
         return $query;
     }
+
     /**
      * @return string
      */
     public function getUrl(): string
     {
         return route('users.show', $this);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function documentversion(): HasMany
+    {
+        return $this->hasMany(DocumentVersion::class);
     }
 
     /**
@@ -356,7 +368,6 @@ class User extends Authenticatable
     {
         $this->last_active = $last_active;
     }
-
 
 
     public function isOnline()
