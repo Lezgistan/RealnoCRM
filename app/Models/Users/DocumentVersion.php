@@ -2,6 +2,7 @@
 
 namespace App\Models\Users;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -114,5 +115,35 @@ class DocumentVersion extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function scopeFilterDocumentVersion(Builder $query, int $documentId): Builder
+    {
+        return $query->where(function (Builder $query) use ($documentId): Builder {
+            return $query->orWhere('document_id', $documentId);
+        });
+    }
+    public function scopeFilter(Builder $query, array $frd): Builder
+    {
+        array_filter($frd);
+        foreach ($frd as $key => $value) {
+            if (null === $value) {
+                continue;
+            }
+            switch ($key) {
+                case 'search':
+                    {
+                        $query->where(function (Builder $query) use ($value): Builder {
+                            return $query->orWhere('id', 'like', '%' . $value . '%')
+                                ->orWhere('document_id', 'like', '%' . $value . '%')
+                                ->orWhere('version', 'like', '%' . $value . '%')
+                            ->orWhere('user_id', 'like', '%' . $value . '%');
+                        });
+                    }
+                    break;
+            }
+        }
+        return $query;
+    }
+
 
 }
