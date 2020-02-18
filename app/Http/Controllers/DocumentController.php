@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\Users\DocumentVersion;
 use App\Models\Users\User;
 use App\Models\Users\UserLog;
 use Illuminate\Http\Request;
@@ -15,11 +16,15 @@ class DocumentController extends Controller
      * @var UserDoc
      */
     protected $documents;
+    /**
+     * @var DocumentVersion
+     */
+    protected $versions;
 
-
-    public function __construct(UserDoc $documents)
+    public function __construct(UserDoc $documents, DocumentVersion $versions)
     {
         $this->documents = $documents;
+        $this->versions = $versions;
     }
 
     /**
@@ -57,9 +62,17 @@ class DocumentController extends Controller
             'name' => 'required|min:1|max:50',
             'document' => 'required',
         ]);
-        $documents = UserDoc::create($data);
-        $documents->setUserId(\Auth::id());
-        $documents->save();
+
+        $document = UserDoc::create($data);
+        $document->setUserId(\Auth::id());
+        $document->save();
+
+        /**
+         * @var DocumentVersion $version
+         */
+        $version = $document->versions()->create($data);
+        $version->setUserId(\Auth::id());
+        $version->save();
         return redirect()->route('documents.index');
     }
 
