@@ -292,7 +292,7 @@ class User extends Authenticatable
     /**
      * @return HasMany
      */
-    public function documentversion(): HasMany
+    public function documentVersions(): HasMany
     {
         return $this->hasMany(DocumentVersion::class);
     }
