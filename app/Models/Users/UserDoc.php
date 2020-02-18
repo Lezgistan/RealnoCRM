@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models\Users;
+
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -132,9 +133,9 @@ class UserDoc extends Model
     /**
      * @return hasMany
      */
-    public function version():hasMany
+    public function versions(): hasMany
     {
-        return $this->hasMany(DocumentVersion::class);
+        return $this->hasMany(DocumentVersion::class,'document_id','id');
     }
 
     /**
@@ -144,12 +145,14 @@ class UserDoc extends Model
     {
         return $this->belongsTo(User::class);
     }
+
     public function scopeFilterDocument(Builder $query, int $userId): Builder
     {
         return $query->where(function (Builder $query) use ($userId): Builder {
             return $query->orWhere('user_id', $userId);
         });
     }
+
     public function scopeFilter(Builder $query, array $frd): Builder
     {
         array_filter($frd);
