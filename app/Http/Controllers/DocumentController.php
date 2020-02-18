@@ -120,4 +120,16 @@ class DocumentController extends Controller
     {
 
     }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Contracts\View\Factory|View
+     */
+    public function versions(Request $request,UserDoc $document)
+    {
+        $frd = $request->all();
+        $versions = $this->versions->filterDocumentVersion($document->getId())->filter($frd)->paginate($frd['perPage'] ?? 20);
+        return view('users.documents.versions', compact('versions'));
+    }
 }

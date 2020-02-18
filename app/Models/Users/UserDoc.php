@@ -153,6 +153,7 @@ class UserDoc extends Model
         });
     }
 
+
     public function scopeFilter(Builder $query, array $frd): Builder
     {
         array_filter($frd);

@@ -42,10 +42,12 @@ use App\Models\Users\User;
                     <img class="img-fluid rounded-circle w-75" src="{{$user->getImageUrl()}}" alt="">
                 </div>
                 <div class="col-6">
-                    {{ $user->getLastName() }}
-                    {{ $user->getFirstName() }}
-                    {{ $user->getMiddleName() }},
-                    {{ $user->getEmail() }}
+                    <a class="text-dark stretched-link" href="{{route('users.show',$user->getKey())}}">
+                        {{ $user->getLastName() }}
+                        {{ $user->getFirstName() }}
+                        {{ $user->getMiddleName() }},
+                        {{ $user->getEmail() }}
+                    </a>
                     <br>
                     <small class="text-muted">
                         Роли: {{ implode(',',$user->getRoles()) }}
