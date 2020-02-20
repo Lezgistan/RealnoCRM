@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+
 /**
  * App\Models\Users\UserDoc
  *
@@ -34,10 +35,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc filterDocument($userId)
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $version
  * @property-read int|null $version_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $versions
+ * @property-read int|null $versions_count
  */
 class UserDoc extends Model
 {
-
 
     protected $table = 'user_docs';
 
@@ -96,6 +98,13 @@ class UserDoc extends Model
     public function setDocUrl(string $doc_url): void
     {
         $this->doc_url = $doc_url;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNextVersionId():int {
+        return 0 < $this->versions()->count() ? ++$this->versions()->orderByDesc('id')->first()->{'version'} : 1;
     }
 
     /**

@@ -24,6 +24,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('users','UserController');
     Route::resource('roles','RoleController');
     Route::resource('permissions','PermissionController');
+    Route::post('documents/{document}/versions/store','DocumentController@versionsStore')->name('document.versions.store');
+
     Route::resource('documents','DocumentController');
     Route::get('users/{user}/roles', 'UserController@roles')->name('users.roles');
     Route::get('users/{user}', 'UserController@show')->name('users.show');
@@ -32,7 +34,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::patch('users/{user}/password', 'UserController@passwordUpdate')->name('users.password.update');
     Route::get('users/{user}/logs','UserController@logs')->name('users.logs');
     Route::get('users/{user}/documents','UserController@documents')->name('users.docs');
-    Route::get('documents/{document}/versions','DocumentController@versions')->name('documents.versions');
+//    Route::get('documents/{user_doc}/versions','DocumentController@versions')->name('documents.versions');
 });
 
 

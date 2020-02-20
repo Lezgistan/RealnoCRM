@@ -6,9 +6,13 @@ namespace App\Http\Controllers;
 use App\Models\Users\DocumentVersion;
 use App\Models\Users\User;
 use App\Models\Users\UserLog;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Models\Users\UserDoc;
+use Storage;
 
 class DocumentController extends Controller
 {
@@ -20,9 +24,14 @@ class DocumentController extends Controller
      * @var DocumentVersion
      */
     protected $versions;
+    /**
+     * @var User
+     */
+    protected $users;
 
-    public function __construct(UserDoc $documents, DocumentVersion $versions)
+    public function __construct(UserDoc $documents, DocumentVersion $versions, User $users)
     {
+        $this->users = $users;
         $this->documents = $documents;
         $this->versions = $versions;
     }
@@ -60,7 +69,7 @@ class DocumentController extends Controller
         $data = $request->all();
         $this->validate($request, [
             'name' => 'required|min:1|max:50',
-            'document' => 'required',
+            'document' => 'required|mimes:docx,pdf,png',
         ]);
 
         $document = UserDoc::create($data);
@@ -68,11 +77,49 @@ class DocumentController extends Controller
         $document->save();
 
         /**
+         * @var UploadedFile $image
+         */
+        $doc = $request->file('document');
+
+        $filename = $request->file('document')->getClientOriginalName();
+
+        $version = $request->only('version');
+        $document->setFilename($filename);
+        $document->save();
+
+        $nextVersionId = $document->getNextVersionId();
+
+        $filename = str_replace(['.',$doc->getClientOriginalExtension()],'',$filename);
+        $filename .= '-'.$nextVersionId.'.'.$doc->getClientOriginalExtension();
+        /**
+         * @var FilesystemAdapter $storage
+         */
+        $storage = Storage::disk('public');
+
+
+        if (isset($doc)) {
+            $documentSource = $doc->get();
+
+            /**
+             * @var $localPath string
+             *
+             */
+            $localPath = '/users/documents/';
+            $storage->putFileAs($localPath, $doc, $filename);
+            $publicPath = $storage->url($localPath.$filename);
+            $document->setDocUrl($publicPath);
+            $document->save();
+
+        };
+
+        /**
          * @var DocumentVersion $version
          */
+        $data['version']  = $nextVersionId;
         $version = $document->versions()->create($data);
         $version->setUserId(\Auth::id());
         $version->save();
+
         return redirect()->route('documents.index');
     }
 
@@ -88,14 +135,44 @@ class DocumentController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @param UserDoc $document
+     * @return \Illuminate\Contracts\View\Factory|View
      */
-    public function edit($id)
+    public function edit(UserDoc $document)
     {
+        return \view('users.documents.edit',compact('document'));
+    }
 
+
+    public function versionsStore(UserDoc $document, Request $request){
+        $data = $request->file('document_version');
+
+
+        /**
+         * @var $localPath string
+         *
+         */
+        $nextVersionId  = $document->getNextVersionId();
+        $filename = $data->getClientOriginalName();
+        $extension = $data->getClientOriginalExtension();
+
+        $filename = str_replace(['.',$extension],'',$filename);
+        $filename = Str::slug($filename);
+        $filename .= '-'.$nextVersionId.'.'.$extension;
+        /**
+         * @var FilesystemAdapter $storage
+         */
+        $storage = Storage::disk('public');
+        $localPath = '/users/documents/';
+        $storage->putFileAs($localPath, $data, $filename);
+        $publicPath = $storage->url($localPath.$filename);
+
+        $version = $document->versions()->create([
+            'user_id'=>\Auth::id(),
+            'filename'=>$data->getClientOriginalName(),
+            'version'=>$document->getNextVersionId(),
+            'doc_url'=>$publicPath,
+        ]);
     }
 
     /**
@@ -126,7 +203,7 @@ class DocumentController extends Controller
      * @param $id
      * @return \Illuminate\Contracts\View\Factory|View
      */
-    public function versions(Request $request,UserDoc $document)
+    public function versions(Request $request, UserDoc $document)
     {
         $frd = $request->all();
         $versions = $this->versions->filterDocumentVersion($document->getId())->filter($frd)->paginate($frd['perPage'] ?? 20);

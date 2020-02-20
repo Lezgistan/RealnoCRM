@@ -23,6 +23,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\DocumentVersion whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\DocumentVersion whereVersion($value)
  * @mixin \Eloquent
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string $filename
+ * @property string $doc_url
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\DocumentVersion filter($frd)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\DocumentVersion filterDocumentVersion($documentId)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\DocumentVersion whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\DocumentVersion whereDocUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\DocumentVersion whereFilename($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\DocumentVersion whereUpdatedAt($value)
  */
 class DocumentVersion extends Model
 {
@@ -34,6 +44,8 @@ class DocumentVersion extends Model
         'document_id',
         'user_id',
         'version',
+        'filename',
+        'doc_url',
     ];
 
     /**
@@ -101,11 +113,43 @@ class DocumentVersion extends Model
     }
 
     /**
+     * @return string
+     */
+    public function getFilename(): string
+    {
+        return $this->filename;
+    }
+
+    /**
+     * @param string $filename
+     */
+    public function setFilename(string $filename): void
+    {
+        $this->filename = $filename;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDocUrl(): string
+    {
+        return $this->doc_url;
+    }
+
+    /**
+     * @param string $doc_url
+     */
+    public function setDocUrl(string $doc_url): void
+    {
+        $this->doc_url = $doc_url;
+    }
+
+    /**
      * @return BelongsTo
      */
     public function document(): belongsTo
     {
-        return $this->belongsTo(UserDoc::class,'id','document_id');
+        return $this->belongsTo(UserDoc::class, 'id', 'document_id');
     }
 
     /**
@@ -122,6 +166,7 @@ class DocumentVersion extends Model
             return $query->orWhere('document_id', $documentId);
         });
     }
+
     public function scopeFilter(Builder $query, array $frd): Builder
     {
         array_filter($frd);
@@ -136,7 +181,7 @@ class DocumentVersion extends Model
                             return $query->orWhere('id', 'like', '%' . $value . '%')
                                 ->orWhere('document_id', 'like', '%' . $value . '%')
                                 ->orWhere('version', 'like', '%' . $value . '%')
-                            ->orWhere('user_id', 'like', '%' . $value . '%');
+                                ->orWhere('user_id', 'like', '%' . $value . '%');
                         });
                     }
                     break;
