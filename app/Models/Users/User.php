@@ -70,6 +70,8 @@ use Illuminate\Notifications\Notifiable;
  * @property-read int|null $docs_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $documentversion
  * @property-read int|null $documentversion_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $documentVersions
+ * @property-read int|null $document_versions_count
  */
 class User extends Authenticatable
 
@@ -308,6 +310,10 @@ class User extends Authenticatable
     public function logsForMe()
     {
         return $this->morphMany(UserLog::class, 'targetable');
+    }
+    public function files()
+    {
+        return $this->morphMany(File::class,'fileable_type');
     }
 
     /**

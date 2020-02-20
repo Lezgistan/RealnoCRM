@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Artesaos\SEOTools\Facades\SEOTools;
 use Artesaos\SEOTools\Traits\SEOTools as SEOToolsTrait;
+use App\Models\Users\Image;
+use App\Models\Users\File;
 
 class UserController extends Controller
 {
@@ -221,42 +223,13 @@ class UserController extends Controller
         $user->setMiddleName($frd['m_name']);
         $user->setEmail($frd['email']);
         $user->save();
-        $storage = Storage::disk('public');
-
-        if ($request->hasFile('image')) {
-            $localPath = '/users/avatars/' . $user->getKey() . '-' . time() . '.jpg';
-            /**
-             * При изменении профиля нужно удалять старое изображение и добавлять новое
-             * Получаем локальный путь старого изображения и записываем его в переменную $oldAvatarLocalPath
-             */
-            $oldAvatarLocalPath = $user->getImageUrlLocalPath();
-            /**
-             * Если старое изображение не равно нулю(существует) и в публичном хранилище есть этот файл, то удалаем его из хранилища
-             * Чтобы в дальнейшем загрузить новое
-             */
-            if (null !== $oldAvatarLocalPath && $storage->has($oldAvatarLocalPath)) {
-                $storage->delete($oldAvatarLocalPath);
-            }
-            /**
-             * Запрашиваем файл изображения, берем это изображение
-             * И шакалим его до 500px в высоту и относительную ширину
-             *
-             */
-            $image = $request->file('image');
-            \Image::make($image)->resize(null, 128, function ($constraint) {
-                $constraint->aspectRatio();
-            });
-            /**
-             * @var FilesystemAdapter $storage
-             * По аналогии вкидываем уже сшакаленный файл
-             */
-            $storage->put($localPath, $image->get());
-            $publicPath = $storage->url($localPath);
-            $user->setImageUrl($publicPath);
-        }
 
 
-        $user->save();
+
+        $file = $request->file('image');
+        $namewithoutext=$file->getClientOriginalName();
+        $image=new Image();
+        $image->addImageFromUploadFile($file,$namewithoutext);
 
         $flashMessages = [['type' => 'success', 'text' => 'Пользователь «' . $user->getName() . '» сохранен']];
         event(new UserUpdate($user));
