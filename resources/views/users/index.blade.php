@@ -39,10 +39,10 @@ use App\Models\Users\User;
                     {{ $user->getKey() }}
                 </div>
                 <div class="col-1">
-                    @if(null!==$user->getAvatarUrl())
+
                         <img class="img-fluid rounded-circle w-75" src="{{$user->getAvatarUrl()}}"
                              alt="">
-                    @endif
+
                 </div>
                 <div class="col-6">
                     <a class="text-dark stretched-link" href="{{route('users.show',$user->getKey())}}">
@@ -59,7 +59,7 @@ use App\Models\Users\User;
 
                 </div>
 
-                <div class="col-4 text-right">
+                <div class="col-4 text-right m-auto">
 
                     @if ((0 < $user->logs()->count())|(0 < $user->logsForMe()->count()))
                         <div class="btn-group table-links">
@@ -78,10 +78,15 @@ use App\Models\Users\User;
 
 
                     <div class="btn-group table-links">
-                        <a href="{{ route('users.password',$user) }}" class="btn btn-outline-secondary">
-                            <i class="fa fa-fw fa-key"></i>
+                        <a href="{{ route('users.documents',$user) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-file-alt"></i>
                         </a>
                     </div>
+                        <div class="btn-group table-links">
+                            <a href="{{ route('users.password',$user) }}" class="btn btn-outline-secondary">
+                                <i class="fa fa-fw fa-key"></i>
+                            </a>
+                        </div>
 
                     <div class="btn-group table-links">
                         <a href="{{ route('users.edit',$user) }}" class="btn btn-outline-secondary">

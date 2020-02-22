@@ -228,9 +228,8 @@ class User extends Authenticatable
         $avatar = $this->getLastAvatar();
         if (null !== $avatar) {
             $avatar = $avatar->getPublicPath();
-
         }
-        return $avatar;
+        return $avatar ?? 'https://vk.com/images/camera_200.png?ava=1';
     }
 
     /**

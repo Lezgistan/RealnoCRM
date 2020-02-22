@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Models\Users\DocumentVersion $version
+ * @var \App\Models\Users\UserDoc $document
  */
 ?>
 
@@ -10,7 +10,7 @@
     <div class="container">
         <div class="row pb-3">
             <div class="col">
-                {{ Form::open(['url'=>route('users.index'),'method'=>'get', 'autocomplete'=>'off','class'=>'form-inline']) }}
+                {{ Form::open(['url'=>route('document.versions',$document),'method'=>'get', 'autocomplete'=>'off','class'=>'form-inline']) }}
                 <div class="input-group">
                     @include('form._input',[
         'name'=>'search',
@@ -33,15 +33,15 @@
 
         @foreach($versions as $version)
             <div class="row border-bottom py-1 table-item">
-                <div class="col-1">
-                    {{ $version->getKey()}}
+                <div class="col-2">
+                    {{ $version->getName()}}
                 </div>
                 <div class="col-7">
-                        {{ $version->getVersion() }}
+
                 </div>
 
-                <div class="col-4">
-                    {{$version->getUserId()}}
+                <div class="col-3">
+                    <a href="">Скачать</a>
                 </div>
             </div>
         @endforeach

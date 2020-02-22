@@ -253,11 +253,10 @@ class UserController extends Controller
 
     /**
      * @param Request $request
-     * @param UserDoc $documents
      * @param User $user
      * @return Factory|View
      */
-    public function documents(Request $request, UserDoc $documents, User $user)
+    public function documents(Request $request, User $user)
     {
         $frd = $request->all();
         $documents = $this->userDocs->filterDocument($user->getKey())->filter($frd)->paginate($frd['perPage'] ?? 20);

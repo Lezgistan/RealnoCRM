@@ -44,7 +44,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {{Auth::user()->getFirstName()}} <img class="rounded-circle nav-avatar" src="{{Auth::user()->getImageUrl()}}" alt="Профиль">
+                            {{Auth::user()->getFirstName()}} <img class="rounded-circle nav-avatar" src="{{Auth::user()->getAvatarUrl()}}" alt="Профиль">
                         </a>
 
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">

@@ -10,7 +10,7 @@ use App\Models\Users\User;
 @section('content')
     <div class="row pb-3">
         <div class="col">
-            {{ Form::open(['url'=>route('users.docs',$documents),'method'=>'get','class'=>'form-inline']) }}
+            {{ Form::open(['url'=>route('users.documents',$documents),'method'=>'get','class'=>'form-inline']) }}
             <div class="input-group">
                 @include('form._input',[
               'name'=>'search',

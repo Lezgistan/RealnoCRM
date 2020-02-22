@@ -10,7 +10,7 @@
     @if (isset($user))
         <div class="row">
             <div class="col-4 col-lg-2 mx-auto d-block text-center text-lg-right">
-                <img src="{{$user->getImageUrl()}}" alt="Аватарка" class="rounded-circle img-fluid mb-3 w-75">
+                <img src="{{$user->getAvatarUrl()}}" alt="Аватарка" class="rounded-circle img-fluid mb-3 w-75">
             </div>
             <div class="col-12 col-lg-10 text-center text-lg-left">
                 <h3 class="m-0">{{$user->getFirstName()}} {{$user->getMiddleName()}} {{$user->getLastName()}}
