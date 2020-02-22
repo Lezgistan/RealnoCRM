@@ -82,9 +82,10 @@ try {
         $trail->parent('documents.index');
         $trail->push('Загрузка документа', route('documents.create'));
     });
+
     Breadcrumbs::for('documents.show', function (\DaveJamesMiller\Breadcrumbs\BreadcrumbsGenerator $trail, \App\Models\Users\UserDoc $document) {
         $trail->parent('documents.index');
-        $trail->push($document->getKey(), route('documents.show', $document));
+        $trail->push('Документ №'.$document->getId().' «'.$document->getName().'»', route('documents.show', $document));
     });
     Breadcrumbs::for('documents.edit', function (\DaveJamesMiller\Breadcrumbs\BreadcrumbsGenerator $trail, \App\Models\Users\UserDoc $document) {
         $trail->parent('documents.show',$document);
