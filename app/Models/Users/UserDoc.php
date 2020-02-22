@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 
 /**
@@ -47,8 +49,6 @@ class UserDoc extends Model
 
     protected $fillable = [
         'name',
-        'filename',
-        'doc_url',
         'user_id',
     ];
 
@@ -103,8 +103,9 @@ class UserDoc extends Model
     /**
      * @return int
      */
-    public function getNextVersionId():int {
-        return 0 < $this->versions()->count() ? ++$this->versions()->orderByDesc('id')->first()->{'version'} : 1;
+    public function getNextVersionId(): int
+    {
+        return $this->versions()->count() + 1;
     }
 
     /**
@@ -140,11 +141,19 @@ class UserDoc extends Model
     }
 
     /**
-     * @return hasMany
+     * @return MorphMany
      */
-    public function versions(): hasMany
+    public function versions(): MorphMany
     {
-        return $this->hasMany(DocumentVersion::class,'document_id','id');
+        return $this->morphMany(File::class, 'fileable');
+    }
+
+    /**
+     * @return string
+     */
+    public function getNextVersionName(): string
+    {
+        return '/users/' . $this->getUserId() . '/documents/' . $this->getKey() . '/' . $this->getNextVersionId();
     }
 
     /**
@@ -153,6 +162,14 @@ class UserDoc extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return MorphOne
+     */
+    public function file(): MorphOne
+    {
+        return $this->morphOne(File::class, 'fileable');
     }
 
     public function scopeFilterDocument(Builder $query, int $userId): Builder

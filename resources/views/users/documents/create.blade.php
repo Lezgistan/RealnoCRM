@@ -9,10 +9,7 @@
                 'required'=>true,
                 'label'=>'Название документа'
             ])
-            @include('form._input',[
-                'name'=>'version',
-                'label'=>'Версия документа'
-                        ])
+
             @include('form._file',[
           'name'=>'document',
            'type'=>'file',

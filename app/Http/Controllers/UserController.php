@@ -89,7 +89,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->all();
+
         $dateTo = Carbon::now()->subYears(18);
         $this->validate($request, [
             'f_name' => 'required|min:1|max:50',
@@ -104,6 +104,8 @@ class UserController extends Controller
             'image.dimensions' => 'Слишком маленькая картинка'
         ]);
 
+        $data = $request->all();
+
         $user = User::create($data);
         $user->setName($data['f_name'], 1);
         $user->setName($data['m_name'], 2);
@@ -112,54 +114,18 @@ class UserController extends Controller
         $user->save();
 
         /**
-         * @var UploadedFile $image
-         *
-         * Запрашиваем файл по ключу image из формы
+         * @var Image $avatar
          */
-        $image = $request->file('image');
-        /**
-         * @var FilesystemAdapter $storage
-         * Создаем публичное хранилище
-         *
-         *
-         */
-        $storage = Storage::disk('public');
+        $avatar = $user->images()->create();
 
         /**
-         *
-         * Если картинка отправлена в форме
-         * Получаем из нее исходный код
-         *
+         * @var UploadedFile $uploadedFile
          */
-        if (isset($image)) {
-            $imageSource = $image->get();
+        $uploadedFile = $request->file('image');
+        $avatar->addImageFromUploadFile($uploadedFile,$user-> getNextAvatarName());
 
-            /**
-             * @var $localPath string
-             *
-             * Локальный путь для аватарок
-             *
-             * time - функцтя php, выводит кол-во секунд от 1970 года
-             *
-             */
-            $localPath = '/users/avatars/' . $user->getKey() . '-' . time() . '.jpg';
-            /**
-             * Кладем нашу картинку в локальный путь для аватарок
-             *
-             */
-            $storage->put($localPath, $imageSource);
-            /**
-             * Создаем публичный путь
-             * На этот путь будем ссылаться при отображении картинки на сайте
-             * Тоесть не из корня папки(localpath), а прямо ссылкой(<img src="сайт/картинка">)
-             * SetImageUrl - записываем нашу картинку в базу данных и сохраняем
-             *
-             */
-            $publicPath = $storage->url($localPath);
-            $user->setImageUrl($publicPath);
-            $user->save();
 
-        };
+
 
         if (isset($data['roles'])) {
             $user->roles()->sync($data['roles']);
@@ -205,8 +171,6 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $frd = $request->all();
-
         $this->validate($request, [
             'email' => 'required',
             'f_name' => 'required',
@@ -214,6 +178,8 @@ class UserController extends Controller
             'm_name' => 'required',
             'image' => 'mimes:jpeg,jpg,png|dimensions:max_height=500,max_width=500,ratio=1/1',
         ]);
+
+        $frd = $request->all();
 
         /**
          * @var User $user
@@ -224,12 +190,16 @@ class UserController extends Controller
         $user->setEmail($frd['email']);
         $user->save();
 
+        /**
+         * @var Image $avatar
+         */
+        $avatar = $user->images()->create();
 
-
-        $file = $request->file('image');
-        $namewithoutext=$file->getClientOriginalName();
-        $image=new Image();
-        $image->addImageFromUploadFile($file,$namewithoutext);
+        /**
+         * @var UploadedFile $uploadedFile
+         */
+        $uploadedFile = $request->file('image');
+        $avatar->addImageFromUploadFile($uploadedFile,$user-> getNextAvatarName());
 
         $flashMessages = [['type' => 'success', 'text' => 'Пользователь «' . $user->getName() . '» сохранен']];
         event(new UserUpdate($user));

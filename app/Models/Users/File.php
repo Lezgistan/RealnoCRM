@@ -377,8 +377,9 @@ class File extends Model
      * @param string $localPathWithoutExtension
      * @return File
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws \League\Flysystem\FileNotFoundException
      */
-    public  function addUploadFile(UploadedFile $file,string $localPathWithoutExtension):File{
+    public function addUploadFile(UploadedFile $file,string $localPathWithoutExtension):File{
         $source = $file->get();
         /**
          * Ищем mime type из upload file

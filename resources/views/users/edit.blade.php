@@ -12,7 +12,7 @@
             @if (isset($user))
                 <div class="text-center justify-content-center">
                 <div class="text-center image-hover-wrapper rounded-circle d-inline-block card border-0">
-                    <img class="img-fluid rounded-circle bg-avatar card-img" id="avatar" src="{{$user->getImageUrl()}}"
+                    <img class="img-fluid rounded-circle bg-avatar card-img" id="avatar" src="{{$user->getAvatarUrl()}}"
                          alt="Аватарка">
                     <div class="avatar-upload card-img-overlay">
                     @include('form._avatar',[

@@ -39,7 +39,10 @@ use App\Models\Users\User;
                     {{ $user->getKey() }}
                 </div>
                 <div class="col-1">
-                    <img class="img-fluid rounded-circle w-75" src="{{$user->getImageUrl()}}" alt="">
+                    @if(null!==$user->getAvatarUrl())
+                        <img class="img-fluid rounded-circle w-75" src="{{$user->getAvatarUrl()}}"
+                             alt="">
+                    @endif
                 </div>
                 <div class="col-6">
                     <a class="text-dark stretched-link" href="{{route('users.show',$user->getKey())}}">

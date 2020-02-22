@@ -3,6 +3,7 @@
 namespace App\Models\Users;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\ImageManager;
@@ -74,6 +75,7 @@ class Image extends File
     {
         return (string)$image->encode($extension, $quality);
     }
+
 
     /**
      * @param UploadedFile $file

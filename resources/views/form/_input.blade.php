@@ -25,6 +25,7 @@ if (isset($name)) {
     'class'=>'form-control '.($errors->has($name) ? ' is-invalid ' : null),
     'required'=>$required ?? null,
     'placeholder'=>$placeholder ?? null,
+    'autocomplete'=>'off',
     ]) }}
     @if (isset($text))
         <small class="form-text text-muted">{!! $text !!}</small>

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laratrust\Traits\LaratrustUserTrait;
@@ -199,6 +200,48 @@ class User extends Authenticatable
     }
 
     /**
+     * @return string
+     */
+    public function getNextAvatarName(): string
+    {
+        return '/users/' . $this->getKey() . '/avatars/' . $this->getNextAvatarId();
+    }
+
+    /**
+     * @return MorphMany
+     */
+    public function images(): MorphMany
+    {
+        return $this->morphMany(Image::class, 'fileable');
+    }
+
+    /**
+     * @return File|null
+     */
+    public function getLastAvatar(): ?File
+    {
+        return $this->images()->orderByDesc('id')->first();
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        $avatar = $this->getLastAvatar();
+        if (null !== $avatar) {
+            $avatar = $avatar->getPublicPath();
+
+        }
+        return $avatar;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNextAvatarId(): int
+    {
+        return $this->files()->count() + 1;
+    }
+
+    /**
      * @param string $f_name
      */
     public function setFirstName(string $f_name): void
@@ -311,9 +354,10 @@ class User extends Authenticatable
     {
         return $this->morphMany(UserLog::class, 'targetable');
     }
+
     public function files()
     {
-        return $this->morphMany(File::class,'fileable_type');
+        return $this->morphMany(File::class, 'fileable');
     }
 
     /**

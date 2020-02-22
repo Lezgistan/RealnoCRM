@@ -17,7 +17,6 @@ class CreateDisksTable extends Migration
             $table->bigIncrements('id');
             $table->string('name')->unique();
             $table->timestamps();
-
         });
     }
 

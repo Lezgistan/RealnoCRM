@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 
-use App\Models\Users\DocumentVersion;
 use App\Models\Users\User;
 use App\Models\Users\UserLog;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -13,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Models\Users\UserDoc;
 use Storage;
+use App\Models\Users\File;
 
 class DocumentController extends Controller
 {
@@ -20,20 +20,16 @@ class DocumentController extends Controller
      * @var UserDoc
      */
     protected $documents;
-    /**
-     * @var DocumentVersion
-     */
-    protected $versions;
+
     /**
      * @var User
      */
     protected $users;
 
-    public function __construct(UserDoc $documents, DocumentVersion $versions, User $users)
+    public function __construct(UserDoc $documents, User $users)
     {
         $this->users = $users;
         $this->documents = $documents;
-        $this->versions = $versions;
     }
 
     /**
@@ -62,63 +58,39 @@ class DocumentController extends Controller
     /**
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      * @throws \Illuminate\Validation\ValidationException
+     * @throws \League\Flysystem\FileNotFoundException
      */
     public function store(Request $request)
     {
-        $data = $request->all();
         $this->validate($request, [
             'name' => 'required|min:1|max:50',
-            'document' => 'required|mimes:docx,pdf,png',
+            'document' => 'required|mimes:docx,pdf,doc,txt',
         ]);
 
+        /**
+         * @var array
+         */
+        $data = $request->all();
+
+        /**
+         * @var UserDoc $document
+         */
         $document = UserDoc::create($data);
         $document->setUserId(\Auth::id());
         $document->save();
 
         /**
-         * @var UploadedFile $image
+         * @var File $version
          */
-        $doc = $request->file('document');
-
-        $filename = $request->file('document')->getClientOriginalName();
-
-        $version = $request->only('version');
-        $document->setFilename($filename);
-        $document->save();
-
-        $nextVersionId = $document->getNextVersionId();
-
-        $filename = str_replace(['.',$doc->getClientOriginalExtension()],'',$filename);
-        $filename .= '-'.$nextVersionId.'.'.$doc->getClientOriginalExtension();
-        /**
-         * @var FilesystemAdapter $storage
-         */
-        $storage = Storage::disk('public');
-
-
-        if (isset($doc)) {
-            $documentSource = $doc->get();
-
-            /**
-             * @var $localPath string
-             *
-             */
-            $localPath = '/users/documents/';
-            $storage->putFileAs($localPath, $doc, $filename);
-            $publicPath = $storage->url($localPath.$filename);
-            $document->setDocUrl($publicPath);
-            $document->save();
-
-        };
+        $version = $document->versions()->create();
 
         /**
-         * @var DocumentVersion $version
+         * @var UploadedFile $uploadedFile
          */
-        $data['version']  = $nextVersionId;
-        $version = $document->versions()->create($data);
-        $version->setUserId(\Auth::id());
-        $version->save();
+        $uploadedFile = $request->file('document');
+        $version->addUploadFile($uploadedFile, $document->getNextVersionName());
 
         return redirect()->route('documents.index');
     }
@@ -140,39 +112,33 @@ class DocumentController extends Controller
      */
     public function edit(UserDoc $document)
     {
-        return \view('users.documents.edit',compact('document'));
+        return \view('users.documents.edit', compact('document'));
     }
 
-
-    public function versionsStore(UserDoc $document, Request $request){
-        $data = $request->file('document_version');
-
-
-        /**
-         * @var $localPath string
-         *
-         */
-        $nextVersionId  = $document->getNextVersionId();
-        $filename = $data->getClientOriginalName();
-        $extension = $data->getClientOriginalExtension();
-
-        $filename = str_replace(['.',$extension],'',$filename);
-        $filename = Str::slug($filename);
-        $filename .= '-'.$nextVersionId.'.'.$extension;
-        /**
-         * @var FilesystemAdapter $storage
-         */
-        $storage = Storage::disk('public');
-        $localPath = '/users/documents/';
-        $storage->putFileAs($localPath, $data, $filename);
-        $publicPath = $storage->url($localPath.$filename);
-
-        $version = $document->versions()->create([
-            'user_id'=>\Auth::id(),
-            'filename'=>$data->getClientOriginalName(),
-            'version'=>$document->getNextVersionId(),
-            'doc_url'=>$publicPath,
+    /**
+     * @param UserDoc $document
+     * @param Request $request
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws \Illuminate\Validation\ValidationException
+     * @throws \League\Flysystem\FileNotFoundException
+     */
+    public function versionsStore(UserDoc $document, Request $request)
+    {
+        $this->validate($request, [
+            'document_version' => 'required|mimes:docx,pdf,doc,txt',
         ]);
+
+        /**
+         * @var File $version
+         */
+        $version = $document->versions()->create();
+
+        /**
+         * @var UploadedFile $uploadedFile
+         */
+        $uploadedFile = $request->file('document_version');
+        $version->addUploadFile($uploadedFile, $document->getNextVersionName());
+        return redirect()->route('documents.index');
     }
 
     /**
