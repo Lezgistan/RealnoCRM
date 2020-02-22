@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property-read int|null $version_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $versions
  * @property-read int|null $versions_count
+ * @property-read \App\Models\Users\File $file
  */
 class UserDoc extends Model
 {

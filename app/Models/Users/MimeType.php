@@ -4,6 +4,20 @@ namespace App\Models\Users;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Users\MimeType
+ *
+ * @property int $id
+ * @property string $extension
+ * @property string $name
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\MimeType newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\MimeType newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\MimeType query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\MimeType whereExtension($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\MimeType whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\MimeType whereName($value)
+ * @mixin \Eloquent
+ */
 class MimeType extends Model
 {
     /**
