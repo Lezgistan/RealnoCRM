@@ -26,10 +26,16 @@ class DocumentController extends Controller
      */
     protected $users;
 
-    public function __construct(UserDoc $documents, User $users)
+    /**
+     * @var File
+     */
+    protected $files;
+
+    public function __construct(UserDoc $documents, User $users, File $files)
     {
         $this->users = $users;
         $this->documents = $documents;
+        $this->files = $files;
     }
 
     /**
@@ -85,7 +91,6 @@ class DocumentController extends Controller
          * @var File $version
          */
         $version = $document->versions()->create();
-
         /**
          * @var UploadedFile $uploadedFile
          */
@@ -96,14 +101,20 @@ class DocumentController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param UserDoc $document
+     * @return \Illuminate\Contracts\View\Factory|View
      */
-    public function show($id)
+    public function show(Request $request, UserDoc $document)
     {
+        /**
+         * @var $frd array
+         */
+        $frd = $request->all();
 
+        $document = $document->versions()->get()->first();
+
+        return view('users.documents.show', compact('document', 'frd'));
     }
 
     /**
@@ -154,25 +165,32 @@ class DocumentController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @param UserDoc $document
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(UserDoc $document)
     {
+        $document->delete();
 
+        $flashMessages = [['type' => 'success', 'text' => 'Документ «' . $document->getName() . '» удален']];
+        return redirect()->back()->with(compact('flashMessages'));
     }
 
     /**
      * @param Request $request
-     * @param $id
+     * @param UserDoc $document
      * @return \Illuminate\Contracts\View\Factory|View
      */
     public function versions(Request $request, UserDoc $document)
     {
+        /**
+         * @var $frd array
+         */
         $frd = $request->all();
-        $versions = $this->versions->filterDocumentVersion($document->getId())->filter($frd)->paginate($frd['perPage'] ?? 20);
-        return view('users.documents.versions', compact('versions'));
+
+        $versions = $document->versions()->filter($frd)->paginate($frd['perPage'] ?? 25);
+        $file = $versions->first();
+        return view('users.documents.versions', compact('versions', 'document', 'frd'));
     }
 }
