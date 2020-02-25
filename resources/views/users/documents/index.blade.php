@@ -43,7 +43,7 @@ use App\Models\Users\UserDoc;
                         {{$document->user()->get()->first()->getName()}}</a><br>
                     <small class="text-muted">Автор</small>
                 </div>
-                <div class="col-4">
+                <div class="col-3">
                     <a class="text-dark stretched-link" href="{{route('documents.show',$document)}}">
                         {{ $document->getName()}}</a><br>
                     <small class="text-muted">Название документа</small>
@@ -52,7 +52,7 @@ use App\Models\Users\UserDoc;
                     {{$document->versions()->get()->last()->getUpdatedAt()->diffForHumans()}}<br>
                     <small class="text-muted">Последнее обновления</small>
                 </div>
-                <div class="col-2 m-auto">
+                <div class="col-3 m-auto text-lg-right">
                     <div class="btn-group table-links">
                         <a href="{{ route('document.versions',$document) }}" class="btn btn-outline-secondary">
                             <i class="fas fa-list"></i>
@@ -63,12 +63,18 @@ use App\Models\Users\UserDoc;
                             <i class="fas fa-plus"></i>
                         </a>
                     </div>
-                        {{ Form::open(['url'=>route('documents.destroy',$document),'method'=>'DELETE','class'=>'btn-group']) }}
-                        <button class="btn btn-outline-danger table-links"
-                                onclick="return confirm('Удалить документ №{{ $document->getId() }} и все его версии?')">
-                            <i class="fa fa-fw fa-trash"></i>
-                        </button>
-                        {{ Form::close() }}
+                    <div class="btn-group table-links">
+                        <a href="{{$document->versions()->get()->last()->getPublicPath()}}"
+                           class="btn btn-outline-secondary" target="_blank">
+                            <i class="fas fa-file-download"></i>
+                        </a>
+                    </div>
+                    {{ Form::open(['url'=>route('documents.destroy',$document),'method'=>'DELETE','class'=>'btn-group']) }}
+                    <button class="btn btn-outline-danger table-links"
+                            onclick="return confirm('Удалить документ №{{ $document->getId() }} и все его версии?')">
+                        <i class="fa fa-fw fa-trash"></i>
+                    </button>
+                    {{ Form::close() }}
                 </div>
             </div>
         @endforeach

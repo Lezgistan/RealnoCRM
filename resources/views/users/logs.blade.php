@@ -33,7 +33,7 @@ use App\Models\Users\User;
     @forelse($logs as $log)
     <div class="row border-bottom py-2">
       <div class="col-1">
-          №{{ $log->getKey() }}
+          {{ $log->getKey() }}
       </div>
         <div class="col-2">
             <span title="{{$log->created_at}}">

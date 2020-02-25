@@ -25,23 +25,36 @@
                 {{Form::close()}}
             </div>
             <div class="col-auto">
-                <a href="{{ route('users.create') }}" class="btn btn-outline-success">
-                    <i class="fas fa-user-plus"></i> Добавить
+                <a href="{{route('documents.edit',$document)}}" class="btn btn-outline-success">
+                    Добавить <i class="fas fa-plus"></i>
                 </a>
             </div>
         </div>
 
         @foreach($versions as $version)
             <div class="row border-bottom py-1 table-item">
-                <div class="col-2">
-                    {{ $version->getName()}}
+                <div class="col-1">
+                    {{ $version->getKey()}}
                 </div>
-                <div class="col-7">
-
-                </div>
-
                 <div class="col-3">
-                    <a href="">Скачать</a>
+                    <a class="text-dark stretched-link"
+                       href="{{route('users.show',$version->getUser())}}">
+                        {{ $version->getUser()->getName()}}</a><br>
+                    <small class="text-muted">Автор</small>
+                </div>
+                <div class="col-4">
+                  {{$version->getUpdatedAt()->format('Y-m-d H:i')}}<br>
+                    <small class="text-muted">Дата загрузки</small>
+                </div>
+                <div class="col-1">
+                    {{$version->getSizeFormatted()}}<br>
+                    <small class="text-muted">Размер</small>
+                </div>
+
+                <div class="col-3 m-auto table-links text-lg-right">
+                    <a href="{{$version->getPublicPath()}}" class="btn btn-outline-secondary" target="_blank">
+                        <i class="fas fa-file-download"></i>
+                    </a>
                 </div>
             </div>
         @endforeach

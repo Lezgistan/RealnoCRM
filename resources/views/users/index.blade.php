@@ -59,7 +59,7 @@ use App\Models\Users\User;
 
                 </div>
 
-                <div class="col-4 text-right m-auto">
+                <div class="col-4 text-lg-right m-auto">
 
                     @if ((0 < $user->logs()->count())|(0 < $user->logsForMe()->count()))
                         <div class="btn-group table-links">

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Users\User;
 use App\Models\Users\UserLog;
+use App\Providers\DocumentCreated;
+use Artesaos\SEOTools\Traits\SEOTools as SEOToolsTrait;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -16,6 +18,7 @@ use App\Models\Users\File;
 
 class DocumentController extends Controller
 {
+    use SEOToolsTrait;
     /**
      * @var UserDoc
      */
@@ -45,8 +48,9 @@ class DocumentController extends Controller
      */
     public function index(Request $request)
     {
+        $this->seo()->setTitle('Документы');
         $frd = $request->all();
-        $documents = $this->documents::filter($frd)->paginate(20);
+        $documents = $this->documents::filter($frd)->orderByDesc('id')->paginate(20);
 
         return view('users.documents.index', compact('documents', 'frd'));
     }
@@ -58,6 +62,7 @@ class DocumentController extends Controller
      */
     public function create()
     {
+        $this->seo()->setTitle('Загрузка документа');
         return view('users.documents.create');
     }
 
@@ -97,24 +102,20 @@ class DocumentController extends Controller
         $uploadedFile = $request->file('document');
         $version->addUploadFile($uploadedFile, $document->getNextVersionName());
 
+        $user=\Auth::getUser();
+        event(new \App\Events\Auth\DocumentCreated($document,$user));
+
         return redirect()->route('documents.index');
     }
 
     /**
-     * @param Request $request
      * @param UserDoc $document
      * @return \Illuminate\Contracts\View\Factory|View
      */
-    public function show(Request $request, UserDoc $document)
+    public function show(UserDoc $document)
     {
-        /**
-         * @var $frd array
-         */
-        $frd = $request->all();
-
-        $document = $document->versions()->get()->first();
-
-        return view('users.documents.show', compact('document', 'frd'));
+        $this->seo()->setTitle('Документ №'.$document->getId());
+        return view('users.documents.show', compact('document'));
     }
 
     /**
@@ -123,12 +124,15 @@ class DocumentController extends Controller
      */
     public function edit(UserDoc $document)
     {
+        $this->seo()->setTitle('Добавление версии документа №'.$document->getId());
         return \view('users.documents.edit', compact('document'));
     }
 
     /**
      * @param UserDoc $document
      * @param Request $request
+     * @param File $documents
+     * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      * @throws \Illuminate\Validation\ValidationException
      * @throws \League\Flysystem\FileNotFoundException
@@ -149,6 +153,10 @@ class DocumentController extends Controller
          */
         $uploadedFile = $request->file('document_version');
         $version->addUploadFile($uploadedFile, $document->getNextVersionName());
+
+
+        event(new \App\Events\Auth\DocumentUpdated($document));
+
         return redirect()->route('documents.index');
     }
 
@@ -171,8 +179,12 @@ class DocumentController extends Controller
      */
     public function destroy(UserDoc $document)
     {
-        $document->delete();
+        $versions = $document->versions()->get()->getQueueableIds();
+        File::destroy($versions);
 
+        $document->delete();
+        $user=\Auth::getUser();
+        event(new \App\Events\Auth\DocumentDeleted($document,$user));
         $flashMessages = [['type' => 'success', 'text' => 'Документ «' . $document->getName() . '» удален']];
         return redirect()->back()->with(compact('flashMessages'));
     }
@@ -184,13 +196,15 @@ class DocumentController extends Controller
      */
     public function versions(Request $request, UserDoc $document)
     {
+        $this->seo()->setTitle('Версии документа №'.$document->getId());
         /**
          * @var $frd array
          */
         $frd = $request->all();
 
-        $versions = $document->versions()->filter($frd)->paginate($frd['perPage'] ?? 25);
-        $file = $versions->first();
+        $versions = $document->versions()->filter($frd)->orderByDesc('id')->paginate($frd['perPage'] ?? 25);
+
         return view('users.documents.versions', compact('versions', 'document', 'frd'));
     }
+
 }
