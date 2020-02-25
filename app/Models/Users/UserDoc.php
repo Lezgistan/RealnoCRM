@@ -35,11 +35,10 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property-read \App\Models\Users\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc filter($frd)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\UserDoc filterDocument($userId)
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $version
  * @property-read int|null $version_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $versions
  * @property-read int|null $versions_count
  * @property-read \App\Models\Users\File $file
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\File[] $versions
  */
 class UserDoc extends Model
 {
@@ -53,6 +52,10 @@ class UserDoc extends Model
         'user_id',
     ];
 
+    protected $dates = [
+        'created_at',
+    ];
+
     /**
      * @return string
      */
@@ -62,11 +65,27 @@ class UserDoc extends Model
     }
 
     /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return route('documents.show', $this);
+    }
+
+    /**
      * @param string $name
      */
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    /**
+     * @return \Illuminate\Support\Carbon|null
+     */
+    public function getCreatedAt(): ?\Illuminate\Support\Carbon
+    {
+        return $this->created_at;
     }
 
     /**

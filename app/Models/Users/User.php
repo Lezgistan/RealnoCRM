@@ -69,10 +69,11 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Users\User whereLastActive($value)
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\UserDoc[] $docs
  * @property-read int|null $docs_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $documentversion
- * @property-read int|null $documentversion_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\DocumentVersion[] $documentVersions
  * @property-read int|null $document_versions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\File[] $files
+ * @property-read int|null $files_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Users\Image[] $images
+ * @property-read int|null $images_count
  */
 class User extends Authenticatable
 
@@ -333,13 +334,7 @@ class User extends Authenticatable
         return route('users.show', $this);
     }
 
-    /**
-     * @return HasMany
-     */
-    public function documentVersions(): HasMany
-    {
-        return $this->hasMany(DocumentVersion::class);
-    }
+
 
     /**
      * @return HasMany
