@@ -26,6 +26,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('permissions','PermissionController');
     Route::post('documents/{document}/versions/store','DocumentController@versionsStore')->name('document.versions.store');
     Route::get('documents/{document}/versions','DocumentController@versions')->name('document.versions');
+    Route::get('documents/{document}/download','DocumentController@download')->name('document.download');
 
     Route::resource('documents','DocumentController');
     Route::get('users/{user}/roles', 'UserController@roles')->name('users.roles');
