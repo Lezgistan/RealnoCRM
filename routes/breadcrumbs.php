@@ -20,13 +20,17 @@ try {
         $trail->parent('users.index');
         $trail->push($user->getName(), route('users.show', $user));
     });
+    Breadcrumbs::for('users.documents', function (\DaveJamesMiller\Breadcrumbs\BreadcrumbsGenerator $trail, \App\Models\Users\User $user) {
+        $trail->parent('users.show',$user);
+        $trail->push('Документы пользователя', route('users.documents', $user));
+    });
     Breadcrumbs::for('users.edit', function (\DaveJamesMiller\Breadcrumbs\BreadcrumbsGenerator $trail, \App\Models\Users\User $user) {
         $trail->parent('users.show',$user);
         $trail->push('Редактирование пользователя', route('users.edit', $user));
     });
 
     Breadcrumbs::for('users.logs', function (\DaveJamesMiller\Breadcrumbs\BreadcrumbsGenerator $trail, \App\Models\Users\User $user) {
-        $trail->parent('users.edit', $user);
+        $trail->parent('users.show', $user);
         $trail->push('Логи', route('users.logs', $user));
     });
 
@@ -91,6 +95,11 @@ try {
         $trail->parent('documents.show',$document);
         $trail->push('Новая версия', route('documents.edit', $document));
     });
+    Breadcrumbs::for('document.versions', function (\DaveJamesMiller\Breadcrumbs\BreadcrumbsGenerator $trail, \App\Models\Users\UserDoc $document) {
+        $trail->parent('documents.show',$document);
+        $trail->push('Версии', route('document.versions', $document));
+    });
+
 
 } catch (\DaveJamesMiller\Breadcrumbs\Exceptions\DuplicateBreadcrumbException $e) {
     echo $e->getMessage();
