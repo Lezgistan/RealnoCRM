@@ -258,6 +258,7 @@ class UserController extends Controller
      */
     public function documents(Request $request, User $user)
     {
+        $this->seo()->setTitle('Документы '.$user->getName());
         $frd = $request->all();
         $documents = $this->userDocs->filterDocument($user->getKey())->filter($frd)->paginate($frd['perPage'] ?? 20);
         return view('users.documents', compact('documents'));
@@ -301,7 +302,7 @@ class UserController extends Controller
     {
         $this->seo()->setTitle('Логи — ' . $user->getName());
         $frd = $request->all();
-        $logs = $this->userLogs->filterUser($user->getKey())->filter($frd)->paginate($frd['perPage'] ?? 20);
+        $logs = $this->userLogs->filterUser($user->getKey())->orderByDesc('id')->filter($frd)->paginate($frd['perPage'] ?? 20);
 
         return view('users.logs', compact('user', 'logs'));
     }

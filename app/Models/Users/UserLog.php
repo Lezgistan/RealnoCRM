@@ -55,6 +55,9 @@ class UserLog extends Model
         3 => 'Установил новый пароль пользователю',
         4 => 'Вошел в систему',
         5 => 'Изменил пароль пользователя',
+        6 => 'Загрузил документ',
+        7 => 'Обновил документ',
+        8 => 'Удалил документ',
     ];
     protected $casts = [
         'payload' => 'array',
@@ -91,8 +94,10 @@ class UserLog extends Model
         $targetable = null;
         if (null !== $this->getTargetable() && $this->getTargetable()->getKey() !== $userId) {
             $targetable = ' <a href="' . $this->getTargetable()->getUrl() . '">' . $this->getTargetable()->getName() . '</a>';
-        } elseif (null === $this->getTargetable()
+        } elseif ((null === $this->getTargetable() && $this->event_id === 8) | (null === $this->getTargetable() && $this->event_id === 7) | (null === $this->getTargetable() && $this->event_id === 6)
         ) {
+            $targetable = " <span class='text-danger'>ДОКУМЕНТ НЕ НАЙДЕН</span>";
+        } elseif (null === $this->getTargetable()) {
             $targetable = " <span class='text-danger'>ПОЛЬЗОВАТЕЛЬ НЕ НАЙДЕН</span>";
         }
 

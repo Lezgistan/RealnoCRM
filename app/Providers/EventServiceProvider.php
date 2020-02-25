@@ -2,7 +2,18 @@
 
 namespace App\Providers;
 
+use App\Events\Auth\ChangePassword;
+use App\Events\Auth\DocumentCreated;
+use App\Events\Auth\DocumentDeleted;
+use App\Events\Auth\DocumentUpdated;
+use App\Events\Auth\SignIn;
 use App\Events\Auth\UserUpdate;
+use App\Listeners\Auth\DocumentDeletedWrite;
+use App\Listeners\Auth\DocumentUpdatedWrite;
+use App\Listeners\Auth\UserRegistered;
+use App\Listeners\Auth\WriteChangePassword;
+use App\Listeners\Auth\WriteDocumentCreate;
+use App\Listeners\Auth\WriteSignIn;
 use App\Listeners\Auth\WriteUserUpdate;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -19,17 +30,29 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
-            'App\Listeners\Auth\UserRegistered',
+            UserRegistered::class,
         ],
-        "App\Events\Auth\SignIn" => [
-            "App\Listeners\Auth\WriteSignIn"
+        SignIn::class => [
+            WriteSignIn::class,
         ],
-        "App\Events\Auth\ChangePassword" => [
-            "App\Listeners\Auth\WriteChangePassword"
+        ChangePassword::class => [
+            WriteChangePassword::class,
         ],
         UserUpdate::class => [
             WriteUserUpdate::class,
         ],
+
+        //Документы
+        DocumentCreated::class => [
+            WriteDocumentCreate::class,
+        ],
+        DocumentUpdated::class=>[
+            DocumentUpdatedWrite::class,
+        ],
+        DocumentDeleted::class=>[
+            DocumentDeletedWrite::class,
+        ],
+
     ];
 
     /**
